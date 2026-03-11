@@ -193,6 +193,78 @@
   .confetti-piece { position:fixed; width:8px; height:8px; border-radius:2px; pointer-events:none; z-index:9999; animation:confettiFall linear forwards; }
   @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
 
+  /* Modal de completado */
+  .completion-overlay {
+    position:fixed; inset:0; z-index:5000;
+    background:rgba(8,11,20,0.92);
+    backdrop-filter:blur(16px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .5s ease;
+  }
+  .completion-overlay.visible { opacity:1; pointer-events:all; }
+  .completion-card {
+    background:var(--surface);
+    border:1px solid rgba(0,245,196,0.25);
+    border-radius:32px;
+    padding:56px 48px;
+    max-width:520px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 0 80px rgba(0,245,196,0.12), 0 40px 80px rgba(0,0,0,0.5);
+    transform:scale(0.85) translateY(30px);
+    transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+    position:relative;
+    overflow:hidden;
+  }
+  .completion-overlay.visible .completion-card { transform:scale(1) translateY(0); }
+  .completion-card::before {
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 0%, rgba(0,245,196,0.08), transparent 60%);
+    pointer-events:none;
+  }
+  .completion-trophy { font-size:5rem; display:block; margin-bottom:16px; animation:trophyBounce 1s cubic-bezier(.34,1.56,.64,1) .3s both; }
+  @keyframes trophyBounce { from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0deg)} }
+  .completion-title {
+    font-family:'Syne',sans-serif;
+    font-size:2.4rem; font-weight:800;
+    letter-spacing:-.03em; line-height:1.1;
+    margin-bottom:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .completion-sub { color:var(--muted); font-size:1rem; line-height:1.6; margin-bottom:32px; }
+  .completion-stats {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:12px; margin-bottom:36px;
+  }
+  .completion-stat {
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:16px; padding:16px 12px;
+  }
+  .completion-stat-num {
+    font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800;
+    color:var(--accent); line-height:1; margin-bottom:4px;
+  }
+  .completion-stat-label { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .completion-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:14px 32px; border-radius:14px; border:none;
+    background:var(--accent); color:var(--bg);
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+    cursor:pointer; transition:all .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .completion-btn:hover { transform:scale(1.05); box-shadow:0 8px 32px rgba(0,245,196,.35); }
+  .completion-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(0,245,196,.08); border:1px solid rgba(0,245,196,.2);
+    color:var(--accent); padding:5px 14px; border-radius:100px;
+    font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em;
+    margin-bottom:20px;
+  }
+
   /* Spinner */
   .spinner { width:20px; height:20px; border:2px solid rgba(255,255,255,.2); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg)} }
@@ -264,7 +336,7 @@
       <div>
         <div class="practice-title">Practicando: <span id="practiceSignName">—</span></div>
         <div style="font-size:.82rem;color:var(--muted);margin-top:4px">
-          Activa la cámara, realiza la seña y presiona <strong>Capturar (30 frames)</strong>
+          Activa la cámara, realiza la seña y presiona <strong>Capturar (30 frames · ~1 segundo)</strong>
         </div>
       </div>
       <button class="close-btn" onclick="closePanel()">✕</button>
@@ -313,7 +385,7 @@
 
         <div class="cam-controls">
           <button class="btn btn-primary" id="btnCamera" onclick="toggleCamera()">📷 Iniciar cámara</button>
-          <button class="btn btn-danger" id="btnCapture" onclick="startCapture()" disabled>⏺ Capturar seña</button>
+          <button class="btn btn-danger" id="btnCapture" onclick="startCountdown()" disabled>⏺ Capturar seña</button>
         </div>
       </div>
     </div>
@@ -343,6 +415,36 @@
   </div>
 
 </div><!-- /container -->
+
+<!-- MODAL COMPLETADO -->
+<div class="completion-overlay" id="completionOverlay">
+  <div class="completion-card">
+    <span class="completion-trophy">🏆</span>
+    <div class="completion-badge">¡Misión cumplida!</div>
+    <div class="completion-title">¡Lo lograste!</div>
+    <p class="completion-sub">
+      Completaste las <strong>10 señas</strong> del lenguaje de señas panameño.<br>
+      Tu dedicación hace la comunicación más inclusiva. 🤟
+    </p>
+    <div class="completion-stats">
+      <div class="completion-stat">
+        <div class="completion-stat-num" id="finalXP">0</div>
+        <div class="completion-stat-label">XP ganados</div>
+      </div>
+      <div class="completion-stat">
+        <div class="completion-stat-num" id="finalCorrect">0</div>
+        <div class="completion-stat-label">Correctas</div>
+      </div>
+      <div class="completion-stat">
+        <div class="completion-stat-num" id="finalStreak">0</div>
+        <div class="completion-stat-label">Mejor racha</div>
+      </div>
+    </div>
+    <button class="completion-btn" onclick="closeCompletion()">
+      🔄 Practicar de nuevo
+    </button>
+  </div>
+</div>
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────
@@ -493,17 +595,35 @@ function stopCamera() {
 }
 
 // ─── CAPTURE & PREDICT ───────────────────────────────────────────
-function startCapture() {
+function startCountdown() {
   if (!state.cameraOn || state.capturing) return;
+  document.getElementById('btnCapture').disabled = true;
+  document.getElementById('btnCamera').disabled = true;
+  hideResult();
+
+  // Countdown de 3 segundos como el cv2.waitKey(1000) del notebook
+  let count = 3;
+  document.getElementById('recLabel').textContent = `Prepárate... ${count}`;
+  document.getElementById('frameBadge').textContent = '⏳';
+
+  const countdown = setInterval(() => {
+    count--;
+    if (count > 0) {
+      document.getElementById('recLabel').textContent = `Prepárate... ${count}`;
+    } else {
+      clearInterval(countdown);
+      startCapture();
+    }
+  }, 1000);
+}
+
+function startCapture() {
   state.capturing = true;
   capturedFrames = [];
 
   const cam = document.getElementById('camDisplay');
   cam.classList.add('active');
   document.getElementById('recLabel').textContent = 'Grabando...';
-  document.getElementById('btnCapture').disabled = true;
-  document.getElementById('btnCamera').disabled = true;
-  hideResult();
 
   const video = document.getElementById('videoEl');
   const canvas = document.getElementById('canvasEl');
@@ -662,6 +782,32 @@ function updateStats() {
   const total = ALL_SIGNS.length, done = state.completed.size;
   document.getElementById('progressLabel').textContent = `${done} / ${total} señas`;
   document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+
+  // Mostrar modal si completó todas las señas
+  if (done === total && !state.completionShown) {
+    state.completionShown = true;
+    state.bestStreak = Math.max(state.bestStreak || 0, state.streak);
+    setTimeout(() => showCompletion(), 800);
+  }
+}
+
+function showCompletion() {
+  document.getElementById('finalXP').textContent = state.xp;
+  document.getElementById('finalCorrect').textContent = state.correct;
+  document.getElementById('finalStreak').textContent = state.bestStreak || state.streak;
+  document.getElementById('completionOverlay').classList.add('visible');
+  // Confetti épico
+  for (let i = 0; i < 3; i++) setTimeout(() => launchConfetti(), i * 600);
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').classList.remove('visible');
+  // Reset para practicar de nuevo
+  state.completed = new Set();
+  state.completionShown = false;
+  updateStats();
+  renderGrid();
+  closePanel();
 }
 
 // ─── TOAST ───────────────────────────────────────────────────────
