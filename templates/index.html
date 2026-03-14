@@ -95,7 +95,7 @@
   .sign-card:hover::before { opacity:1; }
   .sign-card.completed { border-color:rgba(0,245,196,.4); background:rgba(0,245,196,.05); }
   .sign-card.active-card { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,245,196,.2),0 20px 40px rgba(0,0,0,.4); }
-  .sign-emoji { font-size:2.8rem; display:block; margin-bottom:12px; filter:drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
+  .sign-gif { width:80px; height:80px; object-fit:cover; border-radius:10px; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto; }
   .sign-label { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; letter-spacing:-.01em; margin-bottom:4px; }
   .sign-sub { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
   .sign-check { position:absolute; top:10px; right:10px; width:22px; height:22px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.65rem; color:var(--bg); font-weight:900; opacity:0; transform:scale(0); transition:all .3s cubic-bezier(.34,1.56,.64,1); }
@@ -118,8 +118,7 @@
   .ref-label { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; font-weight:500; }
   .ref-display { background:var(--surface2); border:1px solid var(--border); border-radius:16px; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; position:relative; overflow:hidden; }
   .ref-display::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at center,rgba(0,245,196,.05),transparent 70%); pointer-events:none; }
-  .ref-sign-big { font-size:5rem; filter:drop-shadow(0 8px 24px rgba(0,245,196,.3)); animation:signBounce 3s ease-in-out infinite; }
-  @keyframes signBounce { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-8px) rotate(2deg)} }
+  .ref-gif { width:90%; max-width:340px; height:auto; border-radius:16px; object-fit:cover; z-index:1; filter:drop-shadow(0 8px 24px rgba(0,245,196,0.2)); }
   .ref-sign-name { font-family:'Syne',sans-serif; font-size:2.5rem; font-weight:800; color:var(--accent); letter-spacing:-.02em; }
   .ref-tip { position:absolute; bottom:16px; font-size:.72rem; color:var(--muted); }
 
@@ -347,7 +346,7 @@
       <div>
         <div class="ref-label">📖 Referencia visual</div>
         <div class="ref-display">
-          <div class="ref-sign-big" id="refEmoji">🤟</div>
+          <img class="ref-gif" id="refGif" src="" alt="">
           <div class="ref-sign-name" id="refName">—</div>
           <div class="ref-tip" id="refTip">Imita esta seña</div>
         </div>
@@ -450,18 +449,18 @@
 // ─── DATA ────────────────────────────────────────────────────────
 const SIGNS = {
   VOCALES: [
-    {id:'A',  label:'A',           emoji:'🤟', tip:'Puño cerrado, pulgar al lado'},
-    {id:'E',  label:'E',           emoji:'✋', tip:'Dedos doblados sobre la palma'},
-    {id:'I',  label:'I',           emoji:'🤙', tip:'Meñique extendido'},
-    {id:'O',  label:'O',           emoji:'👌', tip:'Dedos formando un círculo'},
-    {id:'U',  label:'U',           emoji:'✌️', tip:'Dos dedos extendidos juntos'},
+    {id:'A',  label:'A',           gif:'https://i.ibb.co/4kyV5WT/A.gif',           tip:'Puño cerrado, pulgar al lado'},
+    {id:'E',  label:'E',           gif:'https://i.ibb.co/HLSz25Jb/E.gif',          tip:'Dedos doblados sobre la palma'},
+    {id:'I',  label:'I',           gif:'https://i.ibb.co/kgLvgJsq/I.gif',          tip:'Meñique extendido'},
+    {id:'O',  label:'O',           gif:'https://i.ibb.co/B5yXbB4n/O.gif',          tip:'Dedos formando un círculo'},
+    {id:'U',  label:'U',           gif:'https://i.ibb.co/W4Dn7dP3/U.gif',          tip:'Dos dedos extendidos juntos'},
   ],
   PALABRAS: [
-    {id:'BONITO',      label:'BONITO',      emoji:'😍', tip:'Mano en círculo frente al rostro'},
-    {id:'CAFE',        label:'CAFÉ',        emoji:'☕', tip:'Letra C rotando sobre la palma'},
-    {id:'BUENOS DIAS', label:'BUENOS DÍAS', emoji:'🌅', tip:'Palma abierta desde el pecho hacia afuera'},
-    {id:'PANAMA',      label:'PANAMÁ',      emoji:'🇵🇦', tip:'Señas de P-A-N-A-M-A'},
-    {id:'INGENIERO',   label:'INGENIERO',   emoji:'⚙️', tip:'Seña específica del gremio técnico'},
+    {id:'BONITO',      label:'BONITO',      gif:'https://i.ibb.co/HLq5RqNb/bonito.gif',       tip:'Mano en círculo frente al rostro'},
+    {id:'CAFE',        label:'CAFÉ',        gif:'https://i.ibb.co/Q3VPLCtm/cafe.gif',         tip:'Letra C rotando sobre la palma'},
+    {id:'BUENOS DIAS', label:'BUENOS DÍAS', gif:'https://i.ibb.co/nqG852qd/buenos-dias.gif',  tip:'Palma abierta desde el pecho hacia afuera'},
+    {id:'PANAMA',      label:'PANAMÁ',      gif:'https://i.ibb.co/LXzDr2s3/PANAMA.gif',       tip:'Señas de P-A-N-A-M-A'},
+    {id:'INGENIERO',   label:'INGENIERO',   gif:'https://i.ibb.co/Jw4KwmR0/ingeniero.gif',    tip:'Seña específica del gremio técnico'},
   ]
 };
 const ALL_SIGNS = [...SIGNS.VOCALES, ...SIGNS.PALABRAS];
@@ -510,7 +509,7 @@ function renderGrid() {
     <div class="sign-card ${state.completed.has(s.id)?'completed':''} ${state.currentSign?.id===s.id?'active-card':''}"
          onclick="openSign('${s.id}')">
       <div class="sign-check">✓</div>
-      <span class="sign-emoji">${s.emoji}</span>
+      <img class="sign-gif" src="${s.gif}" alt="${s.label}" loading="lazy">
       <div class="sign-label">${s.label}</div>
       <div class="sign-sub">${state.completed.has(s.id)?'✓ Completada':'Toca para practicar'}</div>
     </div>`).join('');
@@ -530,7 +529,8 @@ function openSign(id) {
   if (!sign) return;
   state.currentSign = sign;
   document.getElementById('practiceSignName').textContent = sign.label;
-  document.getElementById('refEmoji').textContent = sign.emoji;
+  document.getElementById('refGif').src = sign.gif;
+  document.getElementById('refGif').alt = sign.label;
   document.getElementById('refName').textContent = sign.label;
   document.getElementById('refTip').textContent = sign.tip;
   hideResult();
