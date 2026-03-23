@@ -20,7 +20,10 @@ app = Flask(__name__)
 CORS(app)
 
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────
-MODEL_PATH = os.environ.get('MODEL_PATH', 'models/train18.h5')
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+_default_model = os.path.join(BASE_DIR, 'models', 'train18.h5')
+MODEL_PATH = os.environ.get('MODEL_PATH', _default_model)
+
 NO_FRAMES = 30
 
 # Señas que reconoce el modelo (mismo orden del entrenamiento)
