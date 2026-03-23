@@ -138,7 +138,11 @@ def process_frames(frames_b64: list) -> dict:
     }
 
 
+# ─── INICIO DEL MODELO (se carga al importar el módulo, compatible con gunicorn) ──
+load_keras_model()
+
 # ─── RUTAS ────────────────────────────────────────────────────────
+
 
 @app.route('/')
 def index():
@@ -200,4 +204,7 @@ def get_actions():
 
 if __name__ == '__main__':
     load_keras_model()
-    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
+    port = int(os.environ.get('PORT', 5000))
+    is_production = os.environ.get('FLASK_ENV') == 'production'
+    ssl = None if is_production else 'adhoc'
+    app.run(debug=not is_production, host='0.0.0.0', port=port, ssl_context=ssl)

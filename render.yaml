@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: signlearn
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: MODEL_PATH
+        value: models/train18.h5
+    plan: free
